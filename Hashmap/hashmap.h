@@ -1,29 +1,50 @@
 #pragma once
 
-typedef unsigned long u64;
-
-const u64 TABLE_SIZE = 10000;
+typedef unsigned long long u64;
 
 
-template<typename K>
+const u64 prime1 = 37;
+const u64 prime2 = 23;
+const u64 prime3 = 7;
+const u64 prime4 = 173;
+
+
+
+template<typename K, size_t tableSize>
 struct KeyHash {
-	u64 operator()(const K &key) const {
-		return static_cast<u64>(key) % TABLE_SIZE;
+	u64 operator()(const K& key) const {
+		u64 hash = prime1;
+		u64 _key = static_cast<u64>(key);
+		hash = (hash * prime2) ^ (_key * prime3);
+		return hash % tableSize;
+	}
+};
+
+template<size_t tableSize>
+struct KeyHash<std::string, tableSize> {
+	u64 operator()(const std::string& key) const {
+		u64 hash = prime1;
+		const char* str = key.c_str();
+		while (*str) {
+			hash = (hash * prime2) ^ (str[0] * prime3);
+			str++;
+		}
+		return hash % tableSize;
 	}
 };
 
 
-template<typename K, typename V, typename F = KeyHash<K>>
+template<typename K, typename V, size_t tableSize, typename F = KeyHash<K, tableSize>>
 class HashMap {
 
 public:
 
 	HashMap() {
-		_table = new HashNode<K, V> * [TABLE_SIZE]();
+		_table = new HashNode<K, V> *[tableSize]();
 	}
 
 	~HashMap() {
-		for (int i = 0; i < TABLE_SIZE; i++) {
+		for (int i = 0; i < tableSize; i++) {
 			HashNode<K, V>* entry = _table[i];
 			while (entry != nullptr) {
 				HashNode<K, V>* prev = entry;
@@ -94,6 +115,18 @@ public:
 		}
 	}
 
+	void showTableFilling() {
+		for (int i = 0; i < tableSize; i++) {
+			int bucketFilling = 0;
+			HashNode<K, V>* entry = _table[i];
+			while (entry != nullptr) {
+				entry = entry->getNext();
+				bucketFilling++;
+			}
+			std::cout << i << " bucket has: " << bucketFilling << " elements" << "\n";
+		}
+	}
+
 	V operator[](const K& key) {
 		V value{};
 		this->get(key, value);
@@ -102,25 +135,25 @@ public:
 
 
 private:
-	template<typename K, typename V>
+	template<typename Key, typename Value>
 	class HashNode {
 
 	public:
-		HashNode(const K& key, const V& value) {
+		HashNode(const Key& key, const Value& value) {
 			this->_key = key;
 			this->_value = value;
-			_next = nullptr;
+			this->_next = nullptr;
 		};
 
-		K getKey() const {
+		Key getKey() const {
 			return _key;
 		}
 
-		V getValue() const {
+		Value getValue() const {
 			return _value;
 		}
 
-		void setValue(V value) {
+		void setValue(const Value& value) {
 			this->_value = value;
 		}
 
@@ -133,9 +166,9 @@ private:
 		}
 
 	private:
-		K _key;
-		V _value;
-		HashNode<K, V>* _next; //next item in a bucket 
+		Key _key;
+		Value _value;
+		HashNode<Key, Value>* _next; //next item in a bucket 
 	};
 
 	HashNode<K, V> **_table;
