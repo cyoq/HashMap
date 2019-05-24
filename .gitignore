@@ -1,5 +1,6 @@
 Debug/*
-Hashmap/Debug/*
-Hashmap/Release/*
+HashMap/Debug/*
+HashMap/Release/*
 .vs/*
 Release/*
+HashMap/Hashmap.vcxproj.user
