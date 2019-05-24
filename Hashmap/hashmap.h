@@ -4,30 +4,17 @@ typedef unsigned long long u64;
 
 
 const u64 prime1 = 37;
-const u64 prime2 = 23;
-const u64 prime3 = 7;
-const u64 prime4 = 173;
-
+const u64 prime2 = 545911;
+const u64 prime3 = 1034233;
 
 
 template<typename K, size_t tableSize>
 struct KeyHash {
 	u64 operator()(const K& key) const {
 		u64 hash = prime1;
-		u64 _key = static_cast<u64>(key);
-		hash = (hash * prime2) ^ (_key * prime3);
-		return hash % tableSize;
-	}
-};
-
-template<size_t tableSize>
-struct KeyHash<std::string, tableSize> {
-	u64 operator()(const std::string& key) const {
-		u64 hash = prime1;
-		const char* str = key.c_str();
-		while (*str) {
-			hash = (hash * prime2) ^ (str[0] * prime3);
-			str++;
+		unsigned char* bit = (unsigned char*)&key;
+		for (int i = 0; i < sizeof(key); i++) {
+			hash = (hash * prime2) ^ ((u64)bit[i] * prime3);
 		}
 		return hash % tableSize;
 	}
