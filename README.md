@@ -53,4 +53,4 @@ In order to remove value, use:
 hmap.remove(key);
 ```
 
-Function `showTableFilling()` shows how buckets of hashmap are filled. 
+Function `showTableFilling()` shows how buckets of hash map are filled. 
